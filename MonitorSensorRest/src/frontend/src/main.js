@@ -7,8 +7,10 @@ import Resource from 'vue-resource'
 import VeeValidate from 'vee-validate'
 import ValidationMessages from 'vee-validate/dist/locale/ru'
 import env from './../env'
+import Paginate from 'vuejs-paginate'
 Vue.config.productionTip = false
 
+Vue.component('paginate', Paginate)
 Vue.use(Resource)
 Vue.use(VeeValidate, {
   locale: 'ru',

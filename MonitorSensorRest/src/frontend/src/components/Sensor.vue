@@ -163,7 +163,11 @@ export default {
     },
     getSensor (id) {
       return this.$http.get(this.$root.env.endpoint + '/sensors/' + id).then(r => {
-        if (r && r.body) this.sensor = Object.assign({}, r.body)
+        if (r && r.body) {
+          this.sensor = Object.assign({}, r.body)
+          this.sensor.sensorsType = this.sensor.sensorType.id
+          this.sensor.sensorsUnit = this.sensor.sensorUnit.id
+        }
         return this.sensor
       }).catch(e => console.log(e))
     },
@@ -198,6 +202,9 @@ export default {
       }).catch(e => console.log(e))
     },
     putSensor () {
+      if (this.sensor.sensorsUnit) this.sensor.sensorUnit = {id: this.sensor.sensorsUnit}
+      if (this.sensor.sensorsType) this.sensor.sensorType = {id: this.sensor.sensorsType}
+
       return this.$http.put(this.$root.env.endpoint + '/sensors/' + this.sensor.id, this.sensor).then(r => {
         if (r && r.body) this.init()
       }).catch(e => console.log(e))

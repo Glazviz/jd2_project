@@ -14,6 +14,14 @@
         <Input name="sensors-search" v-model="searchString" />
       </template>
       <template name="footer">
+        <paginate
+          v-bind:page-count="totalPages"
+          v-bind:initial-page="page"
+          v-bind:force-page="page"
+          prev-text="Prev"
+          next-text="Next"
+          v-bind:click-handler="handlePageChange"
+        ></paginate>
         <router-link v-bind:to="{name: 'Sensor', params: {id: 0}}">Create</router-link>
       </template>
     </SensorsList>
@@ -73,13 +81,17 @@ export default {
       ],
       sensors: [],
       searchString: null,
+      totalPages: 0,
       page: 1,
-      count: 10
+      count: 5
     }
   },
   watch: {
-    'searchString' (value) {
-      if (!value || !value.length || value.length >= 3) this.getSensors()
+    'searchString' (value, oldValue) {
+      if (!value || !value.length || value.length >= 3) {
+        this.page = 1
+        this.getSensors()
+      }
     }
   },
   methods: {
@@ -90,11 +102,18 @@ export default {
       this.$http.get(this.$root.env.endpoint + '/sensors', {
         params: {
           search: this.searchString,
-          page: this.page,
-          count: this.count
+          page: (this.page - 1),
+          pageSize: this.count
         }
       }).then(r => {
-        if (r && r.body) this.sensors = Object.assign([], r.body)
+        if (r && r.body) {
+          this.sensors = Object.assign([], r.body.sensors.map(sensor => {
+            sensor.sensorsType = sensor.sensorType.name
+            sensor.sensorsUnit = sensor.sensorUnit.name
+            return sensor
+          }))
+          this.totalPages = r.body.totalPages
+        }
       }).catch(e => console.log(e))
     },
     deleteSensor (sensor) {
@@ -102,6 +121,10 @@ export default {
       return this.$http.delete(this.$root.env.endpoint + '/sensors/' + sensor.id).then(r => {
         this.getSensors()
       }).catch(e => console.log(e))
+    },
+    handlePageChange (value) {
+      this.page = value
+      this.getSensors()
     }
   },
   created () {

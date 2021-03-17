@@ -11,9 +11,7 @@ import java.util.List;
 
 @Repository
 public interface SensorRepository extends JpaRepository<SensorInfo, Long> {
-    List<SensorInfo> findBySensorsNameContaining (String search);
-    /*
+    //List<SensorInfo> findBySensorsNameContaining (String search);
     Page<SensorInfo> findAll (Pageable pageable);
     Page<SensorInfo> findBySensorsNameContaining (String search, Pageable pageable);
-    */
 }

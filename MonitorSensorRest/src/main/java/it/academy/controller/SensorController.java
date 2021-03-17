@@ -7,16 +7,14 @@ import it.academy.repository.SensorRepository;
 import it.academy.repository.TypeRepository;
 import it.academy.repository.UnitRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @CrossOrigin(origins = "http://localhost:8080")
 @RestController
@@ -32,14 +30,14 @@ public class SensorController {
     @Autowired
     UnitRepository unitRepository;
 
-    /*
         @GetMapping("/sensors")
     public ResponseEntity<Map<String, Object>> getAllSensors(@RequestParam(required = false) String search,
-                                                             @RequestParam(defaultValue = "0") int pageNum,
+                                                             @RequestParam(defaultValue = "0") int page,
                                                              @RequestParam(defaultValue = "3") int pageSize) {
-        try {
+            System.out.println(page);
+            try {
             List<SensorInfo> sensorsInfo = new ArrayList<>();
-            Pageable paging = PageRequest.of(pageNum, pageSize);
+            Pageable paging = PageRequest.of(page, pageSize);
 
             Page<SensorInfo> sensorInfoPage;
             if (search == null)
@@ -60,26 +58,6 @@ public class SensorController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-     */
-
-    @GetMapping("/sensors")
-    public ResponseEntity<List<SensorInfo>> getAllSensors(@RequestParam(required = false) String search) {
-        try {
-            List<SensorInfo> sensorsInfo = new ArrayList<>();
-
-            if (search == null)
-                sensorsInfo.addAll(sensorRepository.findAll());
-            else
-                sensorsInfo.addAll(sensorRepository.findBySensorsNameContaining(search));
-
-            if (sensorsInfo.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            }
-            return new ResponseEntity<>(sensorsInfo, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 
     @GetMapping("/sensors/{id}")
     public ResponseEntity<SensorInfo> getSensorById(@PathVariable("id") long id) {
@@ -90,8 +68,15 @@ public class SensorController {
 
     @PostMapping("/sensors")
     public ResponseEntity<SensorInfo> createSensor(@RequestBody SensorInfo sensorInfo) {
-        sensorRepository.save(sensorInfo);
-        return new ResponseEntity<>(sensorInfo, HttpStatus.CREATED);
+        SensorInfo sensorInfoCreate = sensorRepository.save(new SensorInfo(sensorInfo.getSensorsName(),
+                sensorInfo.getSensorsModel(),
+                sensorInfo.getSensorsRangeFrom(),
+                sensorInfo.getSensorsRangeTo(),
+                sensorInfo.getSensorsLocation(),
+                sensorInfo.getDescriptions(),
+                sensorInfo.getSensorType(),
+                sensorInfo.getSensorUnit()));
+        return new ResponseEntity<>(sensorInfoCreate, HttpStatus.CREATED);
     }
 
     @PutMapping("/sensors/{id}")
@@ -106,6 +91,8 @@ public class SensorController {
             sensorUpdate.setSensorsRangeTo(sensorInfo.getSensorsRangeTo());
             sensorUpdate.setSensorsLocation(sensorInfo.getSensorsLocation());
             sensorUpdate.setDescriptions(sensorInfo.getDescriptions());
+            sensorUpdate.setSensorUnit(sensorInfo.getSensorUnit());
+            sensorUpdate.setSensorType(sensorInfo.getSensorType());
             return new ResponseEntity<>(sensorRepository.save(sensorUpdate), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

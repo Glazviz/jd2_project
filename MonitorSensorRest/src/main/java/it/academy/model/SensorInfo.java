@@ -35,9 +35,13 @@ public class SensorInfo {
     private String descriptions;
 
     @ManyToOne
+    @JoinColumn(name = "SENSORS_TYPE_ID", referencedColumnName = "TYPE_ID")
     private SensorType sensorType;
 
     @ManyToOne
+    @JoinColumn(name = "SENSORS_UNIT_ID", referencedColumnName = "UNIT_ID")
     private SensorUnit sensorUnit;
 
+    public SensorInfo(String sensorsName, String sensorsModel, String sensorsRangeFrom, String sensorsRangeTo, String sensorsLocation, String descriptions, SensorType sensorType, SensorUnit sensorUnit) {
+    }
 }
